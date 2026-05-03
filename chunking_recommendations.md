@@ -22,10 +22,9 @@ quality evaluation, across two content types: a structured PDF
 
 ## For PDF Documents
 
-**Recommended strategy:** Recursive character splitting + token verification
+**Recommended strategy:** Following our exercise, would be Recursive Character Chunking, but following a broader overview Recursive character splitting + token verification
 
 **Reasoning:**
-
 - PDF text extracted from structured documents (headings, sections,
   paragraphs) contains natural `\n\n` boundaries that
   `RecursiveCharacterTextSplitter` detects as first-priority split
@@ -66,11 +65,20 @@ quality evaluation, across two content types: a structured PDF
 
 ## For Podcast Transcripts
 
-**Recommended strategy:** Pre-process transcript → then recursive
-character splitting with speaker-turn separators
+**Recommended strategy:** Following our exercise Token-Based Chunking. Considering a broader overview, would be recommended to Pre-process transcript → then recursive
+character splitting + adding speakers labels
 
 **Reasoning:**
 
+**Following our exercise:**
+- Podcast transcripts are long, conversational, and often less formally structured than PDFs. Token-based chunking gives better control over the amount of text sent to embedding models and LLMs.
+- This approach is especially useful when transcripts include speaker turns, timestamps, filler words, and topic shifts that may not align cleanly with paragraph or heading boundaries.
+- Key advantages include predictable LLM input size, fewer context-window issues, and more consistent embedding behavior.
+- Optimal chunk size: around 500-900 tokens, depending on transcript density and how often the topic changes.
+- Recommended overlap: 75-150 tokens to avoid losing context across speaker turns or topic transitions.
+
+
+**With pre-processing:** 
 - Raw podcast transcripts have almost no `\n\n` boundaries and use
   long, unpunctuated run-on sentences — the two signals that recursive
   splitting relies on most. Without pre-processing, recursive splitting
@@ -85,22 +93,6 @@ character splitting with speaker-turn separators
   overlap is needed to recover split context, which in turn inflates
   chunk count significantly.
 
-**Recommended pre-processing steps (before splitting):**
-
-```python
-import re
-
-def clean_transcript(text: str) -> str:
-    # 1. Normalise speaker labels to consistent separators
-    text = re.sub(r'\n?(HOST|GUEST|SPEAKER \d+):', r'\n\n\1:', text)
-    # 2. Add sentence-ending punctuation to lines that lack it
-    text = re.sub(r'([a-z])\n', r'\1.\n', text)
-    # 3. Collapse excessive whitespace
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    return text.strip()
-
-podcast_text_clean = clean_transcript(podcast_text)
-```
 
 **Optimal settings (after pre-processing):**
 
@@ -131,6 +123,7 @@ podcast_text_clean = clean_transcript(podcast_text)
 | Fixed-size (char) | Simple, no dependencies, predictable chunk count | Breaks sentences and paragraphs freely; ±30% token variance makes context budgeting unreliable | Rapid prototyping, uniform content where boundary quality does not matter |
 | Recursive (char) | Respects `\n\n` → `\n` → `. ` → ` ` hierarchy; meaningful improvement for structured docs; configurable separators | Still has token variance; podcasts get little benefit without pre-processing; slightly more complex to configure | Structured documents (PDFs, articles, reports) where paragraph and sentence boundaries are well-defined |
 | Token-based | Exact token count per chunk (±1–2 tokens); eliminates context window overflow risk; essential for LLM integration | No boundary awareness — as structure-blind as fixed-size; requires `tiktoken` or equivalent; 500 tokens ≠ 500 characters | Any pipeline where the LLM context budget must be respected precisely; embedding models with strict token limits |
+| Recursive + Token | Best of both worlds: boundary-aware splitting with exact token count validation; production-grade | Two-step pipeline; slightly more code complexity; re-splitting oversized chunks can degrade boundary quality | Production RAG pipelines where both retrieval quality and context budgeting matter |
 
 ---
 

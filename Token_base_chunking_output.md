@@ -1,6 +1,6 @@
 #Results analysis:
 
-* **Conclusion:** For both, podcast and PDF, token chunking seems to be a better production choice compared to recursive character chunking. Is better on efficiency (i.e. 8 podcast chunks which means fewer embeddings, no loss of information as each token chunk is almost full) and predictability (token chunks have an 85-92% fill rate with near zero variances across chunks)
+* **Conclusion:** For podcast, token chunking seems to be a better production choice compared to recursive character chunking. Is better on efficiency (i.e. 8 podcast chunks which means fewer embeddings, no loss of information as each token chunk is almost full) and predictability (token chunks have an 85-92% fill rate with near zero variances across chunks)
 
 => In short: token chunking gives you tighter control, lower cost, and better alignment with how the model will consume the chunks, without meaningful loss in boundary quality.
 
