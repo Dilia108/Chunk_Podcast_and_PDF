@@ -5,17 +5,17 @@ Yes, it does break the sentences, even words.
 * How does it handle paragraph boundaries?
 Does not seem to have paragraph boundaries. Paragraphs are treated as characters.
 * Which content type handles fixed-size chunking better?
-It seems to work better for the pdf. Pdf is structured, shows lower overlapping for 2000 size. 
+It seems to work better for the pdf. Pdf is structured, which would aling better with fixed boundaries. The high chunk counts means a more granular retrieval, which is useful for queries that might target specific information.
 
 Visual Comparison:
 ![chunking results](image.png)
 
-Few takeaways:
+**Few takeaways:**
 * Chunk size has by far the largest effect (Halving the chunk size roughly doubles the number of chunks in both sources)
 * Overlap sensitivity shrinks as chunks get larger. 
 * The PDF is far less sensitive to overlap at large chunk sizes than the podcast.
 
-**Recommendation**: for a podcast, size 1000 with overlap 50–100 is a reasonable sweet spot — one gets meaningful context preservation without an explosion in chunk count. For the PDF, size 500 with overlap 50 gives fine-grained retrieval while keeping the chunk count manageable.
+**Recommendation**: from the results obtained, a podcast, size 1000 with overlap 50–100 is a reasonable sweet spot — one gets meaningful context preservation without an explosion in chunk count. For the PDF, size 500 with overlap 100 gives fine-grained retrieval while keeping the chunk count manageable(smaller chunks =more precise retrieval) .
 
 
 Available chunk sets:

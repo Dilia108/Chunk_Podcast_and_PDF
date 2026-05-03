@@ -1,7 +1,7 @@
 ### Analysis questions:
 
 * Does recursive chunking preserve sentence boundaries better?
-Yes, is preserving it better when I see the results. 
+Yes, is preserving it better when I see the examples.  
 * How does it handle the podcast's conversational structure?
 It's partially improved compared to fixed-size. But maybe recursive still is not the best way to handle content that has no structure.
 * Does it respect PDF section headers?

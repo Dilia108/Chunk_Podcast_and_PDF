@@ -17,7 +17,6 @@ quality evaluation, across two content types: a structured PDF
 | Fixed-size (char) | Low (±30% token variance) | Poor — frequent mid-sentence cuts | None | Very fast | Prototyping, uniform content |
 | Recursive (char) | Low (±30% token variance) | Good for PDFs, fair for podcasts | None | Fast | Structured documents |
 | Token-based | Exact (±1–2 tokens) | Poor — no separator awareness | Full | Fast | LLM integration, context budgeting |
-| Recursive + token verify | Exact | Good | Full | Moderate | Production RAG pipelines |
 
 ---
 
@@ -132,7 +131,6 @@ podcast_text_clean = clean_transcript(podcast_text)
 | Fixed-size (char) | Simple, no dependencies, predictable chunk count | Breaks sentences and paragraphs freely; ±30% token variance makes context budgeting unreliable | Rapid prototyping, uniform content where boundary quality does not matter |
 | Recursive (char) | Respects `\n\n` → `\n` → `. ` → ` ` hierarchy; meaningful improvement for structured docs; configurable separators | Still has token variance; podcasts get little benefit without pre-processing; slightly more complex to configure | Structured documents (PDFs, articles, reports) where paragraph and sentence boundaries are well-defined |
 | Token-based | Exact token count per chunk (±1–2 tokens); eliminates context window overflow risk; essential for LLM integration | No boundary awareness — as structure-blind as fixed-size; requires `tiktoken` or equivalent; 500 tokens ≠ 500 characters | Any pipeline where the LLM context budget must be respected precisely; embedding models with strict token limits |
-| Recursive + token verify | Best of both worlds: boundary-aware splitting with exact token count validation; production-grade | Two-step pipeline; slightly more code complexity; re-splitting oversized chunks can degrade boundary quality | Production RAG pipelines where both retrieval quality and context budgeting matter |
 
 ---
 
@@ -172,7 +170,7 @@ Does your content have clear structural markers (\n\n, headers)?
    boundaries — a warning sign that boundary-aware splitting will
    struggle.
 
-4. **The ideal pipeline is recursive split → token verify → embed.**
+4. **The ideal pipeline would be recursive split → token verify → embed.**
    Use `RecursiveCharacterTextSplitter` for boundary quality, then
    verify every chunk's token count with `tiktoken`, and discard or
    re-split any chunk that exceeds your embedding model's token limit.
